@@ -76,27 +76,58 @@ export const logout = (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+// export const updateProfile = async (req, res) => {
+//   try {
+//     const { profilePic } = req.body;
+//     const userId = req.user._id;
+//     if (!profilePic) {
+//       return res.status(400).json({ message: "Profile pic is required" });
+//     }
+//     const uploadResponse = await cloudinary.uploader.upload(profilePic);
+//     const updatedUser = await User.findById(
+//       userId,
+//       {
+//         profilePic: uploadResponse.secure_url,
+//       },
+//       { new: true }
+//     );
+//     res.status(200).json(updatedUser);
+//   } catch (error) {
+//     console.log("Error in updateProfile", error.message);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
 export const updateProfile = async (req, res) => {
   try {
     const { profilePic } = req.body;
-    const userId = res.user._id;
+    const userId = req.user._id; // Accessing the user ID from req.user
+
     if (!profilePic) {
       return res.status(400).json({ message: "Profile pic is required" });
     }
+
+    // Upload profilePic to Cloudinary
     const uploadResponse = await cloudinary.uploader.upload(profilePic);
-    const updatedUser = await User.findById(
+
+    // Update the user's profilePic
+    const updatedUser = await User.findByIdAndUpdate(
       userId,
-      {
-        profilePic: uploadResponse.secure_url,
-      },
-      { new: true }
+      { profilePic: uploadResponse.secure_url },
+      { new: true } // Return the updated user document
     );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     res.status(200).json(updatedUser);
   } catch (error) {
-    console.log("Error in updateProfile", error.message);
+    console.log("Error in updateProfile:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
 export const checkAuth = (req, res) => {
   try {
     res.status(200).json(req.user);
