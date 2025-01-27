@@ -5,8 +5,9 @@ import messageRoutes from "./routes/message.route.js";
 import { connectDB } from "./lib/db.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { app,server } from "./lib/socket.js";
 dotenv.config();
-const app = express();
+
 const port = process.env.PORT;
 app.use(express.json());
 app.use(cookieParser());
@@ -22,7 +23,7 @@ app.use("/api/messages", messageRoutes);
 app.get("/", (req, res) => {
   res.send("<h1>Hello</h1>");
 });
-app.listen(port, () => {
+server.listen(port, () => {
   console.log("runnig on ", port);
   connectDB();
 });
