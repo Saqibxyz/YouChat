@@ -53,13 +53,23 @@ export const useAuthStore = create((set, get) => ({
     try {
       await axiosInstance.post("/auth/logout");
       set({ authUser: null });
+
+      // Safely disconnect the socket
+      try {
+        get.disconnectSocket();
+      } catch (socketError) {
+        console.error("Error disconnecting socket:", socketError);
+        // Optionally show a warning if needed
+      }
+
+      // Show success message after all operations succeed
       toast.success("Logged out successfully");
-      get.disconnectSocket();
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to logout");
-      console.log("Error in logout", error);
+      console.log("Error in logout:", error);
     }
   },
+
   updateProfile: async (data) => {
     set({ isUpdatingProfile: true });
     try {
@@ -84,11 +94,10 @@ export const useAuthStore = create((set, get) => ({
       },
     });
     socket.connect();
-      set({ socket: socket });
-      socket.on("getOnlineUsers", (userIds) => {
-          set({ onlineUsers: userIds });
-          
-      })
+    set({ socket: socket });
+    socket.on("getOnlineUsers", (userIds) => {
+      set({ onlineUsers: userIds });
+    });
   },
   disconnectSocket: () => {
     if (get().socket?.connected) get.socket.disconnect();
